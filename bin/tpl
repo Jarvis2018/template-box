@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+
+require('commander')
+	.version(require('../package.json').version)
+	.usage('<command> [options]')
+	.command('create <template-name>', 'generate a new project from template-box')
+	.parse(process.argv)

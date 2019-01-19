@@ -1,0 +1,75 @@
+#!/usr/bin/env node
+
+const program = require('commander')
+const download = require('download-git-repo')
+const ora = require('ora')
+const chalk = require('chalk')
+const inquirer = require('inquirer')
+const checkVersion = require('../lib/check-version')
+
+program
+  .usage('<template-name> [project-name]')
+  .parse(process.argv)
+
+/**
+ * help
+ */
+program.on('--help', () => {
+  console.log('')
+  console.log('Examples:')
+  console.log(chalk.gray('  # create a new project from template-box'))
+  console.log('  $ tpl create template-name my-project')
+  console.log('')
+  console.log(chalk.red(`  Missing required argument ${chalk.yellow('<template-name>')}.`))
+})
+
+function help () {
+  if (program.args.length < 1) {
+    program.help()
+  }
+}
+help()
+
+const templateName = program.args[0]
+const projectName = program.args[1]
+const to = projectName || '.'
+// const hasVersion = templateName.indexOf('@') !== -1
+// const templateVersion = hasVersion ? templateName.sub(templateName.indexOf('@')) : false
+
+if (templateName) {
+  inquirer
+    .prompt([{
+      type: 'confirm',
+      message: 'create project in current directory？',
+      name: 'ok'
+    }])
+    .then(answers => {
+      if (answers.ok) {
+        run()
+      }
+    })
+}
+
+/**
+ *
+ */
+function run () {
+  checkVersion(() => {
+    const template = `TemplateBox-templates/${templateName}`
+    downloadTemplate(template, to)
+  })
+}
+
+/**
+ * download template
+ */
+function downloadTemplate (template, dest) {
+  const spinner = ora('downloading template...').start()
+  download(template, dest, err => {
+    spinner.stop()
+    console.log(err ? chalk.red('download failed') : chalk.green('download successful'))
+  })
+}
+
+// console.log('program：' + program.args, program.clone)
+// console.log('process:' + process.argv)
